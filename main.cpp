@@ -1,129 +1,160 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <cstdlib>
+#include <windows.h>
+#include <time.h>
 
 using namespace std;
 
 #define length 600
-#define width 400
+#define width 700
+#define speed 10
 
 
-int Top_point(int coor[4][2])
+void draw_circle(SDL_Renderer *renderer, int x, int y, int radius, SDL_Color color)
 {
-    int res_num;
-    int temp = width;
-    int i = 0;
-    while(i!=4)
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    for (int w = 0; w < radius * 2; w++)
     {
-        if (coor[i][1] < temp)
+        for (int h = 0; h < radius * 2; h++)
         {
-            temp = coor[i][1];
-            res_num = i;
+            int dx = radius - w; // horizontal offset
+            int dy = radius - h; // vertical offset
+            if ((dx*dx + dy*dy) <= (radius * radius))
+            {
+                SDL_RenderDrawPoint(renderer, x + dx, y + dy);
+            }
         }
-        i+=1;
     }
-    return res_num;
-}
-
-int Right_point(int coor[4][2])
-{
-    int res_num;
-    int temp = 0;
-    int i = 0;
-    while(i!=4)
-    {
-        if (coor[i][0] > temp)
-        {
-            temp = coor[i][0];
-            res_num = i;
-        }
-        i+=1;
-    }
-    return res_num;
-}
-
-int Left_point(int coor[4][2])
-{
-    int res_num;
-    int temp = length;
-    int i = 0;
-    while(i!=4)
-    {
-        if (coor[i][0] < temp)
-        {
-            temp = coor[i][0];
-            res_num = i;
-        }
-        i+=1;
-    }
-    return res_num;
 }
 
 
+int rand(int n)
+{
+    int result = (rand() % n);
+    return result;
+}
+
+void draw_balls(int start_point , int coordinates[20][7][2] , SDL_Renderer * renderer)
+{
+    SDL_Color col_red = {255 , 0 , 0};
+    SDL_Color col_blue = {0 , 0 , 255};
+    SDL_Color col_green = {0 , 255 , 0};
+    SDL_Color col_yellow = {255 , 255 , 0};
+    SDL_Color col_black = {0 , 0 , 0};
+    SDL_Color col_orange = {255 , 165 , 0};
+
+    int i = 0;
+    int Rx = 15;
+    while (i < 20)
+    {
+        int j = 0;
+        int Ry = start_point;
+        while (j < 7)
+        {
+            if (coordinates[i][j][0] == 0)
+            {
+                draw_circle(renderer , Rx , Ry  , 15 , col_red);
+            }
+            if (coordinates[i][j][0] == 1)
+            {
+                draw_circle(renderer , Rx , Ry  , 15 , col_blue);
+            }
+            if (coordinates[i][j][0] == 2)
+            {
+                draw_circle(renderer , Rx , Ry  , 15 , col_green);
+            }
+            if (coordinates[i][j][0] == 3)
+            {
+                draw_circle(renderer , Rx , Ry  , 15 , col_yellow);
+            }
+            if (coordinates[i][j][0] == 4)
+            {
+                draw_circle(renderer , Rx , Ry  , 15 , col_black);
+            }
+            if (coordinates[i][j][0] == 5)
+            {
+                draw_circle(renderer , Rx , Ry  , 15 , col_orange);
+            }
+            j += 1;
+            Ry += 30;
+        }
+        i += 1;
+        Rx +=30;
+    }
+    SDL_SetRenderDrawColor(renderer, 0 , 0 , 0 , 255);
+    SDL_RenderDrawLine(renderer, 0 , 600 , 600 , 600);
+    SDL_RenderPresent(renderer);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Delay(speed);
+    SDL_RenderClear(renderer);
+
+
+}
 
 int main(int argc, char ** argv)
 {
-    int n , coordinates[4][2];
-
-    cout << "enter n : ";
-    cin >> n;
+    srand(time(0));
+    int coordinates[20][7][2];
     int i = 0;
-    while(i!=4)
+    while (i < 20)
     {
-        cout << "enter coordinate "<<i+1<< " : ";
-        cin >> coordinates[i][0] >> coordinates[i][1];
-        i+=1;
+        int j = 0;
+        while (j < 7)
+        {
+            coordinates[i][j][0] = rand(6);
+            int e = rand(9);
+            if (e = 1)
+            {
+                int r = rand(2);
+                if (r = 1)
+                {
+                    coordinates[i][j][1] = -1;
+                }
+                else
+                {
+                    coordinates[i][j][1] = rand(6);
+                }
+            }
+            j += 1;
+        }
+        i += 1;
     }
 
 
-    int top_point = Top_point(coordinates);
-    int right_point = Right_point(coordinates);
-    int left_point = Left_point(coordinates);
-    int middle_point = 6 - (top_point + right_point + left_point);
+/**<
+for(int i = 0;i <20;i++)
+    {
+        for(int j = 0 ; j<7 ; j++)
+        {
+            cout<<coordinates[i][j][0]<< " ";
+        }
+        cout << '\n';
+    } */
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window * window = SDL_CreateWindow("TALES",SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, length, width, SDL_WINDOW_SHOWN);
     SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 0,0, 0, 255);
-    SDL_RenderDrawLine(renderer, coordinates[top_point][0], coordinates[top_point][1],coordinates[left_point][0], coordinates[left_point][1]);
-    SDL_RenderDrawLine(renderer, coordinates[top_point][0], coordinates[top_point][1],coordinates[right_point][0], coordinates[right_point][1]);
-    SDL_RenderDrawLine(renderer, coordinates[top_point][0], coordinates[top_point][1],coordinates[middle_point][0], coordinates[middle_point][1]);
-    SDL_RenderDrawLine(renderer, coordinates[middle_point][0], coordinates[middle_point][1],coordinates[left_point][0], coordinates[left_point][1]);
-    SDL_RenderDrawLine(renderer, coordinates[middle_point][0], coordinates[middle_point][1],coordinates[right_point][0], coordinates[right_point][1]);
 
 
-
-    int templ1[2] = {coordinates[left_point][0], coordinates[left_point][1]};
-    int templ2[2] = {coordinates[middle_point][0], coordinates[middle_point][1]};
-    int templ3[2] = {coordinates[right_point][0], coordinates[right_point][1]};
-
-    i = 1;
-    while(n!=i)
+    i = 15;
+    while (i <= 400)
     {
-        templ1[0] += (abs((coordinates[top_point][0] - coordinates[left_point][0])))/n;
-        templ1[1] -= (abs((coordinates[left_point][1] - coordinates[top_point][1])))/n;
-        if (coordinates[top_point][0]>= coordinates[middle_point][0])
-        {
-            templ2[0] += (abs((coordinates[top_point][0] - coordinates[middle_point][0])))/n;
-        }
-        else
-        {
-            templ2[0] -= (abs((coordinates[top_point][0] - coordinates[middle_point][0])))/n;
-        }
-        templ2[1] -= (abs((coordinates[middle_point][1] - coordinates[top_point][1])))/n;
-
-        templ3[0] -= (abs((coordinates[right_point][0] - coordinates[top_point][0])))/n;
-        templ3[1] -= (abs((coordinates[top_point][1] - coordinates[right_point][1])))/n;
-
-        SDL_RenderDrawLine(renderer,templ2[0] , templ2[1], templ1[0], templ1[1]);
-        SDL_RenderDrawLine(renderer,templ2[0] , templ2[1], templ3[0], templ3[1]);
-
-        i+=1;
+        Sleep(10);
+        draw_balls(i , coordinates , renderer);
+        i +=1;
     }
 
-    SDL_RenderPresent(renderer);
-    SDL_Delay(10000);
+    SDL_Delay(200000);
+
     return 0;
 }
+
+
+
+
+
+
+
